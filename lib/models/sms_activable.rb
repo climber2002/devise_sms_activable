@@ -164,7 +164,7 @@ module Devise
 
           def generate_small_token(column)
             loop do
-              token = Devise.friendly_token[0,5].upcase
+              token = SecureRandom.urlsafe_base64(15).tr('lIO0=\-_', 'sxyzEMU')[0, 4].upcase
               break token unless to_adapter.find_first({ column => token })
             end
           end
