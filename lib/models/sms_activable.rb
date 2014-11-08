@@ -85,34 +85,34 @@ module Devise
         self.sms_confirmed_at = Time.now
       end
 
+      # Checks if the confirmation for the user is within the limit time.
+      # We do this by calculating if the difference between today and the
+      # confirmation sent date does not exceed the confirm in time configured.
+      # Confirm_in is a model configuration, must always be an integer value.
+      #
+      # Example:
+      #
+      #   # sms_confirm_within = 1.day and sms_confirmation_sent_at = today
+      #   confirmation_period_valid?   # returns true
+      #
+      #   # sms_confirm_within = 5.days and sms_confirmation_sent_at = 4.days.ago
+      #   confirmation_period_valid?   # returns true
+      #
+      #   # sms_confirm_within = 5.days and sms_confirmation_sent_at = 5.days.ago
+      #   confirmation_period_valid?   # returns false
+      #
+      #   # sms_confirm_within = 0.days
+      #   confirmation_period_valid?   # will always return false
+      #
+      def confirmation_sms_period_valid?
+        confirmation_sms_sent_at && confirmation_sms_sent_at.utc >= self.class.sms_confirm_within.ago
+      end
+
       protected
 
         # Callback to overwrite if an sms confirmation is required or not.
         def sms_confirmation_required?
           !confirmed_sms?
-        end
-
-        # Checks if the confirmation for the user is within the limit time.
-        # We do this by calculating if the difference between today and the
-        # confirmation sent date does not exceed the confirm in time configured.
-        # Confirm_in is a model configuration, must always be an integer value.
-        #
-        # Example:
-        #
-        #   # sms_confirm_within = 1.day and sms_confirmation_sent_at = today
-        #   confirmation_period_valid?   # returns true
-        #
-        #   # sms_confirm_within = 5.days and sms_confirmation_sent_at = 4.days.ago
-        #   confirmation_period_valid?   # returns true
-        #
-        #   # sms_confirm_within = 5.days and sms_confirmation_sent_at = 5.days.ago
-        #   confirmation_period_valid?   # returns false
-        #
-        #   # sms_confirm_within = 0.days
-        #   confirmation_period_valid?   # will always return false
-        #
-        def confirmation_sms_period_valid?
-          confirmation_sms_sent_at && confirmation_sms_sent_at.utc >= self.class.sms_confirm_within.ago
         end
 
         # Checks whether the record is confirmed or not, yielding to the block
@@ -155,7 +155,13 @@ module Devise
           # Options must have the sms_confirmation_token
           def confirm_by_sms_token(sms_confirmation_token)
             sms_confirmable = find_or_initialize_with_error_by(:sms_confirmation_token, sms_confirmation_token)
-            sms_confirmable.confirm_sms! if sms_confirmable.persisted?
+            if sms_confirmable.persisted? 
+              if sms_confirmable.confirmation_sms_period_valid?          
+                sms_confirmable.confirm_sms! 
+              else
+                sms_confirmable.errors.add('sms', 'The activation token is expired.')
+              end
+            end
             sms_confirmable
           end
 
