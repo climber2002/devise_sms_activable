@@ -138,6 +138,12 @@ module Devise
           generate_sms_token && save(:validate => false)
         end
 
+        def generate_sms_token_without_reset!
+          self.sms_confirmation_token = self.class.sms_confirmation_token
+          self.confirmation_sms_sent_at = Time.now.utc
+          save(:validate => false)
+        end
+
         module ClassMethods
           # Attempt to find a user by it's email. If a record is found, send a new
           # sms token instructions to it. If not user is found, returns a new user
