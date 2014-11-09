@@ -174,7 +174,8 @@ module Devise
           # If the user is already confirmed, create an error for the user
           # Options must have the sms_confirmation_token
           def confirm_by_sms_token(msisdn, sms_confirmation_token)
-            sms_confirmable = find_or_initialize_with_errors([:msisdn, :sms_confirmation_token], [msisdn, sms_confirmation_token])
+            sms_confirmable = find_or_initialize_with_errors([:msisdn, :sms_confirmation_token], { :msisdn => msisdn, 
+                :sms_confirmation_token => sms_confirmation_token })
             if sms_confirmable.persisted? 
               if sms_confirmable.confirmation_sms_period_valid?          
                 sms_confirmable.confirm_sms! 
