@@ -138,9 +138,13 @@ module Devise
           generate_sms_token && save(:validate => false)
         end
 
-        def generate_sms_token_without_reset!
+        def generate_sms_token_without_reset
           self.sms_confirmation_token = self.class.sms_confirmation_token
           self.confirmation_sms_sent_at = Time.now.utc
+        end
+
+        def generate_sms_token_without_reset!
+          generate_sms_token_without_reset
           save(:validate => false)
         end
 
@@ -165,7 +169,7 @@ module Devise
               if sms_confirmable.confirmation_sms_period_valid?          
                 sms_confirmable.confirm_sms! 
               else
-                sms_confirmable.errors.add('sms', 'The activation token is expired.')
+                sms_confirmable.errors.add('sms_confirmation_token', 'is expired')
               end
             end
             sms_confirmable
