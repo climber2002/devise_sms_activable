@@ -66,7 +66,13 @@ module Devise
       end
 
       def resend_sms_token_anyway
-        send_sms_token
+        if (self.phone?)
+          generate_sms_token_without_reset!
+          ::Devise.sms_sender.send_sms(self.phone, I18n.t(:"devise.sms_activations.sms_body", :sms_confirmation_token => self.sms_confirmation_token, :default => self.sms_confirmation_token))
+        else
+          self.errors.add(:sms_confirmation_token, :no_phone_associated)
+          false
+        end
       end
 
       # Overwrites active? from Devise::Models::Activatable for sms confirmation
