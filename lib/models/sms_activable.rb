@@ -65,6 +65,10 @@ module Devise
         unless_sms_confirmed { send_sms_token }
       end
 
+      def resend_sms_token_anyway
+        send_sms_token
+      end
+
       # Overwrites active? from Devise::Models::Activatable for sms confirmation
       # by verifying whether a user is active to sign in or not. If the user
       # is already confirmed, it should never be blocked. Otherwise we need to
