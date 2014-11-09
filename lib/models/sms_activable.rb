@@ -173,8 +173,8 @@ module Devise
           # If no user is found, returns a new user with an error.
           # If the user is already confirmed, create an error for the user
           # Options must have the sms_confirmation_token
-          def confirm_by_sms_token(sms_confirmation_token)
-            sms_confirmable = find_or_initialize_with_error_by(:sms_confirmation_token, sms_confirmation_token)
+          def confirm_by_sms_token(msisdn, sms_confirmation_token)
+            sms_confirmable = find_or_initialize_with_errors([:msisdn, :sms_confirmation_token], [msisdn, sms_confirmation_token])
             if sms_confirmable.persisted? 
               if sms_confirmable.confirmation_sms_period_valid?          
                 sms_confirmable.confirm_sms! 
@@ -189,10 +189,7 @@ module Devise
           # The token is 5 chars long and uppercased.
 
           def generate_small_token(column)
-            loop do
-              token = SecureRandom.urlsafe_base64(15).tr('lIO0=\-_', 'sxyzEMU')[0, 4].upcase
-              break token unless to_adapter.find_first({ column => token })
-            end
+            "%04d" % SecureRandom.random_number(9999)
           end
 
           # Generate an sms token checking if one does not already exist in the database.
