@@ -16,7 +16,7 @@ module Devise
     #     use this to let your user access some features of your application without
     #     confirming the account, but blocking it after a certain period (ie 7 days).
     #     By default confirm_within is 0 days, so the user must confirm before entering.
-    #     If you want to allow user to use parts of the site and block others override 
+    #     If you want to allow user to use parts of the site and block others override
     #     sms_confirmation_required? and check manually on selected pages using the
     #     require_sms_activated! helper or sms_confirmed? property on record
     #
@@ -52,7 +52,7 @@ module Devise
       # Send confirmation token by sms
       def send_sms_token
         if(self.phone?)
-          generate_sms_token! if self.generate_sms_token.nil?
+          generate_sms_token!
           ::Devise.sms_sender.send_sms(self.phone, I18n.t(:"devise.sms_activations.sms_body", :sms_confirmation_token => self.sms_confirmation_token, :default => self.sms_confirmation_token))
         else
           self.errors.add(:sms_confirmation_token, :no_phone_associated)
@@ -174,11 +174,11 @@ module Devise
           # If the user is already confirmed, create an error for the user
           # Options must have the sms_confirmation_token
           def confirm_by_sms_token(msisdn, sms_confirmation_token)
-            sms_confirmable = find_or_initialize_with_errors([:msisdn, :sms_confirmation_token], { :msisdn => msisdn, 
+            sms_confirmable = find_or_initialize_with_errors([:msisdn, :sms_confirmation_token], { :msisdn => msisdn,
                 :sms_confirmation_token => sms_confirmation_token })
-            if sms_confirmable.persisted? 
-              if sms_confirmable.confirmation_sms_period_valid?          
-                sms_confirmable.confirm_sms! 
+            if sms_confirmable.persisted?
+              if sms_confirmable.confirmation_sms_period_valid?
+                sms_confirmable.confirm_sms!
               else
                 sms_confirmable.errors.add('sms_confirmation_token', 'is expired')
               end
